@@ -2,9 +2,32 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Menu } from 'lucide-react';
 
 export default function Navbar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const NavItems = () => (
+    <>
+      <Link href="/">
+        <Button variant="link" className="hover:text-green-200">
+          Home
+        </Button>
+      </Link>
+      <Link href="/ree">
+        <Button variant="ghost" className="hover:text-green-200">
+          REE
+        </Button>
+      </Link>
+      <Link href="/profile">
+        <Button variant="ghost" className="hover:text-green-200">
+          Profile
+        </Button>
+      </Link>
+    </>
+  );
 
   return (
     <nav className="bg-green-600 text-white shadow-lg">
@@ -19,76 +42,24 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
-            <Link href="/" className="hover:text-green-200 transition-colors">
-              Home
-            </Link>
-            <Link href="/ree" className="hover:text-green-200 transition-colors">
-              REE
-            </Link>
-            <Link href="/profile" className="hover:text-green-200 transition-colors">
-              Profile
-            </Link>
+          <div className="hidden md:flex items-center space-x-4">
+            <NavItems />
           </div>
 
-          {/* Mobile menu button */}
-          <button
-            className="md:hidden p-2 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              {isMenuOpen ? (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              ) : (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              )}
-            </svg>
-          </button>
+          {/* Mobile Navigation */}
+          <Sheet open={isOpen} onOpenChange={setIsOpen}>
+            <SheetTrigger asChild className="md:hidden">
+              <Button variant="ghost" size="icon">
+                <Menu className="h-6 w-6" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="bg-green-600 text-white">
+              <div className="flex flex-col space-y-4 mt-8">
+                <NavItems />
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
-
-        {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-              <Link
-                href="/"
-                className="block px-3 py-2 rounded-md hover:bg-green-700 transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Home
-              </Link>
-              <Link
-                href="/ree"
-                className="block px-3 py-2 rounded-md hover:bg-green-700 transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                REE
-              </Link>
-              <Link
-                href="/profile"
-                className="block px-3 py-2 rounded-md hover:bg-green-700 transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Profile
-              </Link>
-            </div>
-          </div>
-        )}
       </div>
     </nav>
   );
