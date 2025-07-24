@@ -11,10 +11,12 @@ import {
   IconBrandGoogle,
   IconLock,
   IconMail,
+  IconUser,
 } from "@tabler/icons-react";
 
-export default function Login() {
+export default function Signup() {
   const [formData, setFormData] = useState({
+    fullname: "",
     email: "",
     password: "",
   });
@@ -57,9 +59,9 @@ export default function Login() {
         this.speedX = Math.random() * 0.5 - 0.25;
         this.speedY = Math.random() * 0.5 - 0.25;
         this.color = `rgba(${
-          Math.floor(Math.random() * 150) + 100
-        }, ${Math.floor(Math.random() * 10) + 15}, ${
-          Math.floor(Math.random() * 155) + 20
+          Math.floor(Math.random() * 100) + 100
+        }, ${Math.floor(Math.random() * 100) + 155}, ${
+          Math.floor(Math.random() * 55) + 200
         }, ${Math.random() * 0.5 + 0.1})`;
       }
 
@@ -97,9 +99,9 @@ export default function Login() {
         canvas.width,
         canvas.height
       );
-      gradient.addColorStop(0, "rgba(105, 23, 42, 0.8)"); // slate-900 with opacity
-      gradient.addColorStop(0.5, "rgba(60, 78, 59, 0.8)"); // green-950 with opacity
-      gradient.addColorStop(1, "rgba(15, 223, 42, 0.8)"); // slate-900 with opacity
+      gradient.addColorStop(0, "rgba(15, 23, 42, 0.8)"); // slate-900 with opacity
+      gradient.addColorStop(0.5, "rgba(6, 78, 59, 0.8)"); // green-950 with opacity
+      gradient.addColorStop(1, "rgba(15, 23, 42, 0.8)"); // slate-900 with opacity
 
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -156,13 +158,14 @@ export default function Login() {
     setError("");
 
     try {
-      const response = await axios.post("/api/auth/login", formData);
-      console.log("Authentication successful", response.data);
+      const response = await axios.post("/api/auth/register", formData);
+      console.log("Registration successful", response.data);
     } catch (error: any) {
       setError(
-        error.response?.data?.message || "Login failed. Please try again."
+        error.response?.data?.message ||
+          "Registration failed. Please try again."
       );
-      console.error("Authentication failed", error);
+      console.error("Registration failed", error);
     } finally {
       setIsLoading(false);
     }
@@ -179,10 +182,10 @@ export default function Login() {
         <div className="backdrop-blur-sm bg-black/30 rounded-2xl p-6 border border-white/10 shadow-xl">
           <div className="text-center mb-6">
             <h2 className="text-2xl font-bold bg-gradient-to-r from-green-300 to-emerald-400 bg-clip-text text-transparent">
-              Welcome Back
+              Create Account
             </h2>
             <p className="text-gray-400 text-sm mt-1">
-              Sign in to continue to NutriByte
+              Join NutriByte for a healthier lifestyle
             </p>
           </div>
 
@@ -193,6 +196,29 @@ export default function Login() {
           )}
 
           <form onSubmit={handleSubmit}>
+            <LabelInputContainer className="mb-3">
+              <Label
+                htmlFor="fullname"
+                className="text-sm text-gray-300"
+              >
+                Full Name
+              </Label>
+              <div className="relative">
+                <span className="absolute left-3 top-2.5 text-gray-400">
+                  <IconUser size={16} />
+                </span>
+                <Input
+                  id="fullname"
+                  placeholder="Your name"
+                  type="text"
+                  className="pl-9 h-9 bg-gray-900/50 border-gray-800 text-white"
+                  value={formData.fullname}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </LabelInputContainer>
+
             <LabelInputContainer className="mb-3">
               <Label
                 htmlFor="email"
@@ -235,37 +261,39 @@ export default function Login() {
                   value={formData.password}
                   onChange={handleChange}
                   required
+                  minLength={8}
                 />
               </div>
+              <p className="text-xs text-gray-500 mt-1">
+                Must be at least 8 characters
+              </p>
             </LabelInputContainer>
-
-            <div className="flex justify-between items-center mb-5 text-xs">
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="remember"
-                  className="mr-2 h-3 w-3 rounded border-gray-700 bg-gray-800"
-                />
-                <label htmlFor="remember" className="text-gray-300">
-                  Remember me
-                </label>
-              </div>
-              <a
-                href="#"
-                className="text-emerald-400 hover:text-emerald-300"
-              >
-                Forgot password?
-              </a>
-            </div>
 
             <button
               className="group/btn relative block h-10 w-full rounded-md bg-gradient-to-br from-emerald-500 to-green-600 font-medium text-white shadow-lg shadow-green-700/20 hover:from-emerald-600 hover:to-green-700 transition-all duration-300 text-sm"
               type="submit"
               disabled={isLoading}
             >
-              {isLoading ? "Signing in..." : "Sign in"}
+              {isLoading ? "Creating account..." : "Create account"}
               <BottomGradient />
             </button>
+
+            <p className="text-xs text-gray-500 mt-3 text-center">
+              By creating an account, you agree to our{" "}
+              <a
+                href="#"
+                className="text-emerald-400 hover:underline"
+              >
+                Terms
+              </a>{" "}
+              and{" "}
+              <a
+                href="#"
+                className="text-emerald-400 hover:underline"
+              >
+                Privacy Policy
+              </a>
+            </p>
           </form>
 
           <div className="my-5 h-px w-full bg-gradient-to-r from-transparent via-gray-600 to-transparent opacity-30" />
@@ -289,12 +317,12 @@ export default function Login() {
 
           <div className="text-center mt-5">
             <p className="text-gray-400 text-xs">
-              Don't have an account?{" "}
+              Already have an account?{" "}
               <Link
-                href="/signup"
+                href="/login"
                 className="text-emerald-400 hover:underline"
               >
-                Sign up
+                Sign in
               </Link>
             </p>
           </div>
