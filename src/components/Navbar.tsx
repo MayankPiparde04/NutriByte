@@ -20,14 +20,18 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const routes = [
+    { label: "Home", path: "/" },
+    { label: "REE", path: "/ree" },
+    { label: "Profile", path: "/profile" },
+    { label: "About", path: "/about" },
+    { label: "Login", path: "/login" },
+  ];
+
   const NavItems = () => (
     <>
-      {["Home", "REE", "Profile"].map((label) => (
-        <Link
-          href={label === "Home" ? "/" : `/${label.toLowerCase()}`}
-          className="group"
-          key={label}
-        >
+      {routes.map(({ label, path }) => (
+        <Link href={path} className="group" key={label}>
           <span className="px-4 py-2 text-sm font-medium text-white hover:text-green-100 transition-all relative">
             {label}
             <span className="absolute left-1/2 -translate-x-1/2 bottom-0 w-0 h-0.5 bg-green-300 group-hover:w-3/4 transition-all duration-200 rounded-full" />
