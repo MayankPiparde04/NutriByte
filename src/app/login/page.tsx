@@ -20,6 +20,7 @@ export default function Login() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [debug, setDebug] = useState<any>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -56,11 +57,11 @@ export default function Login() {
         this.size = Math.random() * 3 + 1;
         this.speedX = Math.random() * 0.5 - 0.25;
         this.speedY = Math.random() * 0.5 - 0.25;
-        this.color = `rgba(${
-          Math.floor(Math.random() * 150) + 100
-        }, ${Math.floor(Math.random() * 10) + 15}, ${
-          Math.floor(Math.random() * 155) + 20
-        }, ${Math.random() * 0.5 + 0.1})`;
+        this.color = `rgba(${Math.floor(Math.random() * 150) + 100}, ${
+          Math.floor(Math.random() * 10) + 15
+        }, ${Math.floor(Math.random() * 155) + 20}, ${
+          Math.random() * 0.5 + 0.1
+        })`;
       }
 
       update() {
@@ -154,35 +155,101 @@ export default function Login() {
     e.preventDefault();
     setIsLoading(true);
     setError("");
+    setDebug(null);
+
+    // Basic validation
+    if (!formData.email || !formData.password) {
+      setError("Email and password are required");
+      setIsLoading(false);
+      return;
+    }
 
     try {
-      const response = await axios.post("/api/auth/login", formData);
+      console.log("Sending login request with email:", formData.email);
+
+      // Set a timeout for the request
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+      const response = await axios.post("/api/auth/login", formData, {
+        signal: controller.signal,
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+      });
+
+      clearTimeout(timeoutId);
+
+      console.log("Login response:", response);
+
+      // Store response data for debugging
+      setDebug({
+        status: response.status,
+        data: response.data,
+      });
+
+      // Handle successful login
       console.log("Authentication successful", response.data);
+      // You could redirect here or store authentication tokens
     } catch (error: any) {
-      setError(
-        error.response?.data?.message || "Login failed. Please try again."
-      );
-      console.error("Authentication failed", error);
+      console.error("Login error:", error);
+
+      // Detailed error logging
+      if (error.response) {
+        console.error("Error response data:", error.response.data);
+        console.error("Error response status:", error.response.status);
+
+        setError(
+          error.response?.data?.message ||
+            error.response?.data?.error ||
+            `Server error: ${error.response.status}`
+        );
+
+        setDebug({
+          type: "Response error",
+          status: error.response.status,
+          data: error.response.data,
+        });
+      } else if (error.request) {
+        console.error("Error request:", error.request);
+        setError("No response from server. Please check your connection.");
+
+        setDebug({
+          type: "Request error",
+          request: "No response received",
+        });
+      } else if (error.message.includes("aborted")) {
+        setError("Request timed out. Please try again.");
+
+        setDebug({
+          type: "Timeout",
+          message: error.message,
+        });
+      } else {
+        console.error("Error message:", error.message);
+        setError("An unexpected error occurred. Please try again.");
+
+        setDebug({
+          type: "Unknown error",
+          message: error.message,
+        });
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center p-4 relative overflow-hidden bg-black">
-      <canvas
-        ref={canvasRef}
-        className="absolute top-0 left-0 w-full h-full -z-10"
-      />
-
+    <div className="min-h-screen w-full flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-slate-900 via-green-950 to-slate-900">
       <div className="w-full max-w-md z-10">
-        <div className="backdrop-blur-sm bg-black/30 rounded-2xl p-6 border border-white/10 shadow-xl">
+        <div className="bg-black/40 rounded-2xl p-6 border border-white/10 shadow-xl">
           <div className="text-center mb-6">
             <h2 className="text-2xl font-bold bg-gradient-to-r from-green-300 to-emerald-400 bg-clip-text text-transparent">
               Welcome Back
             </h2>
             <p className="text-gray-400 text-sm mt-1">
-              Sign in to continue to NutriByte
+              Please sign in to continue to NutriByte
             </p>
           </div>
 
@@ -193,11 +260,8 @@ export default function Login() {
           )}
 
           <form onSubmit={handleSubmit}>
-            <LabelInputContainer className="mb-3">
-              <Label
-                htmlFor="email"
-                className="text-sm text-gray-300"
-              >
+            <LabelInputContainer className="mb-4">
+              <Label htmlFor="email" className="text-sm text-gray-300">
                 Email Address
               </Label>
               <div className="relative">
@@ -216,11 +280,8 @@ export default function Login() {
               </div>
             </LabelInputContainer>
 
-            <LabelInputContainer className="mb-4">
-              <Label
-                htmlFor="password"
-                className="text-sm text-gray-300"
-              >
+            <LabelInputContainer className="mb-6">
+              <Label htmlFor="password" className="text-sm text-gray-300">
                 Password
               </Label>
               <div className="relative">
@@ -250,10 +311,7 @@ export default function Login() {
                   Remember me
                 </label>
               </div>
-              <a
-                href="#"
-                className="text-emerald-400 hover:text-emerald-300"
-              >
+              <a href="#" className="text-emerald-400 hover:text-emerald-300">
                 Forgot password?
               </a>
             </div>
@@ -290,10 +348,7 @@ export default function Login() {
           <div className="text-center mt-5">
             <p className="text-gray-400 text-xs">
               Don't have an account?{" "}
-              <Link
-                href="/signup"
-                className="text-emerald-400 hover:underline"
-              >
+              <Link href="/signup" className="text-emerald-400 hover:underline">
                 Sign up
               </Link>
             </p>
